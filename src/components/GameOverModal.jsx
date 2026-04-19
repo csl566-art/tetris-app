@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore.js';
 import { saveScore, getRankPosition } from '../storage/rankingStore.js';
 
@@ -47,21 +47,22 @@ export default function GameOverModal({ onShowRanking }) {
   const level = useGameStore(s => s.level);
   const lines = useGameStore(s => s.lines);
   const dispatch = useGameStore(s => s.dispatch);
-  const [rankPos, setRankPos] = useState(null);
-  const [saved, setSaved] = useState(false);
+  const savedRef = useRef(false);
 
   useEffect(() => {
-    if (status === 'gameover' && !saved) {
-      const pos = getRankPosition(score);
-      setRankPos(pos);
+    if (status === 'gameover' && !savedRef.current) {
+      savedRef.current = true;
       saveScore(score, level, lines);
-      setSaved(true);
     }
     if (status !== 'gameover') {
-      setSaved(false);
-      setRankPos(null);
+      savedRef.current = false;
     }
-  }, [status, score, level, lines, saved]);
+  }, [status, score, level, lines]);
+
+  const rankPos = useMemo(() => {
+    if (status !== 'gameover') return null;
+    return getRankPosition(score);
+  }, [status, score]);
 
   if (status !== 'gameover') return null;
 
