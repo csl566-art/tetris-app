@@ -8,11 +8,13 @@ import RankingBoard from './components/RankingBoard.jsx';
 import MainMenu from './components/MainMenu.jsx';
 import { useGameLoop } from './hooks/useGameLoop.js';
 import { useKeyboard } from './hooks/useKeyboard.js';
+import { useCellSize } from './hooks/useCellSize.js';
 
 export default function App() {
   useGameLoop();
   useKeyboard();
   const [showRanking, setShowRanking] = useState(false);
+  const { cellSize, panelWidth, miniSize } = useCellSize();
 
   return (
     <div style={{
@@ -26,19 +28,19 @@ export default function App() {
       gap: 6,
     }}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', width: 80 }}>
-          <HoldPanel />
+        <div style={{ display: 'flex', flexDirection: 'column', width: panelWidth }}>
+          <HoldPanel panelWidth={panelWidth} miniSize={miniSize} />
         </div>
 
-        <GameCanvas />
+        <GameCanvas cellSize={cellSize} />
 
-        <div style={{ display: 'flex', flexDirection: 'column', width: 80 }}>
-          <ScoreBoard />
-          <NextPiecePanel />
+        <div style={{ display: 'flex', flexDirection: 'column', width: panelWidth }}>
+          <ScoreBoard panelWidth={panelWidth} />
+          <NextPiecePanel panelWidth={panelWidth} miniSize={miniSize} />
         </div>
       </div>
 
-      <div style={{ width: '100%', maxWidth: 400 }}>
+      <div style={{ width: '100%', maxWidth: cellSize * 10 + panelWidth * 2 + 16 }}>
         <TouchControls />
       </div>
 

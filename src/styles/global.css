@@ -28,7 +28,7 @@
   --block-J: #2979ff;
   --block-L: #ff6d00;
 
-  --cell-size: 28px;
+  --cell-size: clamp(16px, calc((100vw - 152px) / 10), 28px);
   --board-w: calc(var(--cell-size) * 10);
   --board-h: calc(var(--cell-size) * 20);
 }

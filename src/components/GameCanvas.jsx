@@ -15,17 +15,13 @@ const COLOR_MAP = {
   7: '#ff6d00', // L
 };
 
-const CELL = 28;
-
-function drawBlock(ctx, r, c, color, alpha = 1) {
+function drawBlock(ctx, r, c, color, cell, alpha = 1) {
   if (!color) return;
   ctx.globalAlpha = alpha;
   ctx.fillStyle = color;
-  ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
-
-  // Inner highlight
+  ctx.fillRect(c * cell + 1, r * cell + 1, cell - 2, cell - 2);
   ctx.fillStyle = 'rgba(255,255,255,0.25)';
-  ctx.fillRect(c * CELL + 2, r * CELL + 2, CELL - 4, 4);
+  ctx.fillRect(c * cell + 2, r * cell + 2, cell - 4, 4);
   ctx.globalAlpha = 1;
 }
 
@@ -66,7 +62,7 @@ export function MiniPieceCanvas({ pieceKey, size = 18 }) {
   );
 }
 
-export default function GameCanvas() {
+export default function GameCanvas({ cellSize = 28 }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -80,57 +76,51 @@ export default function GameCanvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const W = BOARD_W * CELL;
-    const H = BOARD_H * CELL;
+    const W = BOARD_W * cellSize;
+    const H = BOARD_H * cellSize;
 
     ctx.clearRect(0, 0, W, H);
 
-    // Background
     ctx.fillStyle = '#0d0d20';
     ctx.fillRect(0, 0, W, H);
 
-    // Grid lines
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 1;
     for (let r = 0; r <= BOARD_H; r++) {
-      ctx.beginPath(); ctx.moveTo(0, r * CELL); ctx.lineTo(W, r * CELL); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, r * cellSize); ctx.lineTo(W, r * cellSize); ctx.stroke();
     }
     for (let c = 0; c <= BOARD_W; c++) {
-      ctx.beginPath(); ctx.moveTo(c * CELL, 0); ctx.lineTo(c * CELL, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(c * cellSize, 0); ctx.lineTo(c * cellSize, H); ctx.stroke();
     }
 
-    // Locked blocks
     for (let r = 0; r < BOARD_H; r++) {
       for (let c = 0; c < BOARD_W; c++) {
-        drawBlock(ctx, r, c, COLOR_MAP[board[r][c]]);
+        drawBlock(ctx, r, c, COLOR_MAP[board[r][c]], cellSize);
       }
     }
 
     if (currentPiece && status === 'playing') {
-      // Ghost
       const ghost = calcGhost(board, currentPiece);
       const ghostColor = COLOR_MAP[currentPiece.color];
       for (const [r, c] of getCells(ghost)) {
-        if (r >= 0) drawBlock(ctx, r, c, ghostColor, 0.25);
+        if (r >= 0) drawBlock(ctx, r, c, ghostColor, cellSize, 0.25);
       }
 
-      // Active piece
       const color = COLOR_MAP[currentPiece.color];
       for (const [r, c] of getCells(currentPiece)) {
-        if (r >= 0) drawBlock(ctx, r, c, color);
+        if (r >= 0) drawBlock(ctx, r, c, color, cellSize);
       }
     }
 
-    // Paused overlay
     if (status === 'paused') {
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
       ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = '#00ffff';
-      ctx.font = 'bold 28px Courier New';
+      ctx.font = `bold ${cellSize}px Courier New`;
       ctx.textAlign = 'center';
       ctx.fillText('PAUSED', W / 2, H / 2);
     }
-  }, [board, currentPiece, status]);
+  }, [board, currentPiece, status, cellSize]);
 
   return (
     <div
@@ -144,8 +134,8 @@ export default function GameCanvas() {
     >
       <canvas
         ref={canvasRef}
-        width={BOARD_W * CELL}
-        height={BOARD_H * CELL}
+        width={BOARD_W * cellSize}
+        height={BOARD_H * cellSize}
         style={{ display: 'block' }}
       />
     </div>
